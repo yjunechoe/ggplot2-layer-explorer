@@ -1,0 +1,26 @@
+Package: ggplot2layerexplorer
+Title: ggplot2 layer explorer
+Version: 0.0.9000
+Authors@R: 
+    person("June", "Choe", , "jchoe001@gmail.com", role = c("aut", "cre"))
+Description: A shinylive app to explore the layer pipeline of ggplot2
+    plots
+License: MIT + file LICENSE
+URL: https://github.com/yjunechoe/ggplot2-layer-explorer
+BugReports: https://github.com/yjunechoe/ggplot2-layer-explorer/issues
+Depends: 
+    R (>= 4.4)
+Imports: 
+    bslib,
+    dplyr,
+    DT,
+    ggplot2,
+    ggtrace,
+    grid,
+    listviewer,
+    palmerpenguins,
+    rlang,
+    shiny,
+    shinyAce
+Encoding: UTF-8
+Repository: https://yjunechoe.r-universe.dev
