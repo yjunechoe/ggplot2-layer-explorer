@@ -22,5 +22,7 @@ Imports:
     rlang,
     shiny,
     shinyAce
+Remotes:
+    url::https://yjunechoe.r-universe.dev/src/contrib/ggtrace_0.7.4.tar.gz
 Additional_repositories: https://yjunechoe.r-universe.dev
 Encoding: UTF-8
