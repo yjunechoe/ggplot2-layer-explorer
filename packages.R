@@ -1,5 +1,8 @@
+in_webr <- function() {
+  isTRUE(nzchar(Sys.getenv("WEBR")))
+}
 # Dependencies not picked up by shinylive
-if (nzchar(Sys.getenv("WEBR"))) {
+if (in_webr()) {
   asNamespace("webr")$install(
     "ggtrace",
     repos = c("https://yjunechoe.r-universe.dev", "https://repo.r-wasm.org/")

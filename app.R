@@ -23,7 +23,7 @@ ui <- page_sidebar(
       choices = unlist(fns, use.names=FALSE),
       selected = character(0)
     ),
-    actionButton("debug_btn", "Debug")
+    if (!in_webr()) { actionButton("debug_btn", "Debug") }
   ),
 
   layout_column_wrap(
@@ -279,7 +279,8 @@ server <- function(input, output, session) {
     cat(input$function_expr)
   })
 
-  observeEvent(input$debug_btn, { browser() })
+  if (!in_webr()) { observeEvent(input$debug_btn, { browser() }) }
+
 }
 
 shinyApp(ui, server, options = list(launch.browser = TRUE))
