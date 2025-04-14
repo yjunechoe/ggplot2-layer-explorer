@@ -15,7 +15,7 @@ Imports:
     dplyr,
     DT,
     ggplot2,
-    ggtrace (>=0.7.4),
+    ggtrace (>= 0.7.4),
     grid,
     listviewer,
     palmerpenguins,
