@@ -6,6 +6,7 @@ library(shinyAce)
 library(listviewer)
 library(ggplot2)
 library(DT)
+webr::install('ggtrace', repos = c('https://yjunechoe.r-universe.dev', 'https://repo.r-wasm.org/'))
 library(ggtrace)
 check_installed("ggtrace (>= 0.7.4)")
 
