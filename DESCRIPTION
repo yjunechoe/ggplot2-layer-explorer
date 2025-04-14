@@ -15,14 +15,11 @@ Imports:
     dplyr,
     DT,
     ggplot2,
-    ggtrace (>= 0.7.4),
     grid,
     listviewer,
     palmerpenguins,
     rlang,
     shiny,
     shinyAce
-Remotes:
-    yjunechoe/ggtrace
 Encoding: UTF-8
 Repository: https://yjunechoe.r-universe.dev
