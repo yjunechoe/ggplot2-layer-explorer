@@ -1,20 +1,15 @@
+library(shiny)
+library(ggplot2)
+library(grid)
+library(dplyr)
 library(rlang)
 library(palmerpenguins)
-library(shiny)
 library(bslib)
 library(shinyAce)
 library(listviewer)
-library(ggplot2)
 library(DT)
-if (nzchar(Sys.getenv("WEBR"))) {
-  asNamespace("webr")$install(
-    "ggtrace",
-    repos = c("https://yjunechoe.r-universe.dev", "https://repo.r-wasm.org/")
-  )
-  check_installed("ggtrace (>= 0.7.4)")
-  library(ggtrace)
-}
 
+source("packages.R")
 source("utils.R")
 
 # UI layout
@@ -81,7 +76,7 @@ server <- function(input, output, session) {
   # Setup environment
   user_env <- new.env()
   lapply(
-    c("grid", "ggplot2", "dplyr"),
+    c("ggtrace", "grid", "ggplot2", "dplyr"),
     function(pkg) eval(
       rlang::call2("library", pkg, character.only = TRUE),
       envir = user_env
@@ -219,7 +214,8 @@ server <- function(input, output, session) {
       ),
       error = function(e) e
     )
-    eval(call2("gguntrace", method_expr, verbose = FALSE, .ns = "ggtrace"), user_env)
+    untrace_expr <- call2("gguntrace", method_expr, .ns = "ggtrace")
+    eval(call2("suppressMessages", untrace_expr), user_env)
 
     if (is_error(highjack_res)) {
       og_res <- eval(parse_expr(fn_to_expr(input$selected_function)), user_env)
@@ -280,7 +276,7 @@ server <- function(input, output, session) {
   # Initial function output
   output$function_output_ui <- renderUI({ verbatimTextOutput("text_output") })
   output$text_output <- renderPrint({
-    "Click a function from the sidebar to explore ggplot layers"
+    cat(input$function_expr)
   })
 
   observeEvent(input$debug_btn, { browser() })

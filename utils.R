@@ -58,7 +58,7 @@ fn_to_expr <- function(fn) {
       cond = call2("layer_is", sym("i"))
     )
   }
-  expr_deparse(expr)
+  deparse1(expr)
 }
 
 local_call <- function(expr) {
@@ -76,5 +76,5 @@ local_call <- function(expr) {
 
 poorman_styler <- function(expr) {
   gsub(x = expr, ",", ",\n ") |>
-    gsub(x = _, "^(\\w+\\()(.*)(\\))$", "\\1\n  \\2\n\\3\n")
+    gsub(x = _, "^(\\w+\\()(.+)(\\))$", "\\1\n  \\2\n\\3\n")
 }
