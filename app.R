@@ -11,9 +11,9 @@ if (nzchar(Sys.getenv("WEBR"))) {
     "ggtrace",
     repos = c("https://yjunechoe.r-universe.dev", "https://repo.r-wasm.org/")
   )
+  check_installed("ggtrace (>= 0.7.4)")
+  library(ggtrace)
 }
-library(ggtrace)
-check_installed("ggtrace (>= 0.7.4)")
 
 source("utils.R")
 
