@@ -15,7 +15,7 @@ Imports:
     dplyr,
     DT,
     ggplot2,
-    yjunechoe/ggtrace (>=0.7.4),
+    ggtrace (>=0.7.4),
     grid,
     listviewer,
     palmerpenguins,
@@ -23,5 +23,6 @@ Imports:
     shiny,
     shinyAce
 Remotes:
+    yjunechoe/ggtrace
 Encoding: UTF-8
 Repository: https://yjunechoe.r-universe.dev
