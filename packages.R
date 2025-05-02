@@ -12,4 +12,9 @@ if (in_webr()) {
     "reactR",
     repos = c("https://react-r.r-universe.dev", "https://repo.r-wasm.org/")
   )
+  asNamespace("webr")$install(
+    "munsell",
+    repos = c("https://repo.r-wasm.org/")
+  )
+  )
 }
