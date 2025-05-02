@@ -11,6 +11,7 @@ library(DT)
 
 source("packages.R")
 source("utils.R")
+source("plot-examples.R")
 
 # UI layout
 ui <- page_sidebar(
@@ -32,10 +33,21 @@ ui <- page_sidebar(
 
     # Code editor card
     card(
+      card_body(
+        max_height = "100px",
+        radioButtons(
+          "plot_selector",
+          "Use a pre-defined plot:",
+          choices = seq_along(plots),
+          selected = 1,
+          inline = TRUE,
+          width = "100%",
+        )
+      ),
       card_header("Code Editor"),
       aceEditor(
         "code_editor",
-        value = initial_code,
+        value = plots$plot1,
         mode = "r", theme = "chrome",
         minLines = 1, maxLines = 20, autoScrollEditorIntoView = TRUE
       ),
@@ -85,7 +97,7 @@ server <- function(input, output, session) {
 
   # Run initial code
   tryCatch({
-    eval(parse(text = initial_code), envir = user_env)
+    eval(parse(text = plots$plot1), envir = user_env)
     # Set initial value for i
     user_env$i <- length(user_env$p$layers)
   }, error = function(e) {
@@ -112,11 +124,11 @@ server <- function(input, output, session) {
     )
   })
 
-  # Execute user code
-  observeEvent(input$run_code_btn, {
+  # Execute user plotting code
+  run_code_editor <- function(code_text) {
     output$code_error_output <- renderText("")
     tryCatch({
-      eval(parse(text = input$code_editor), envir = user_env)
+      eval(parse(text = code_text), envir = user_env)
       if (!exists("p", envir = user_env) || !inherits(user_env$p, "ggplot")) {
         stop("A ggplot object `p` must exist in the environment")
       }
@@ -131,6 +143,16 @@ server <- function(input, output, session) {
     }, error = function(e) {
       output$code_error_output <- renderText(paste("Error:", e$message))
     })
+  }
+
+  observeEvent(input$run_code_btn, {
+    run_code_editor(input$code_editor)
+  })
+
+  observeEvent(input$plot_selector, {
+    selected_plot_code <- plots[[as.integer(input$plot_selector)]]
+    updateAceEditor(session, "code_editor", value = selected_plot_code)
+    run_code_editor(selected_plot_code)
   })
 
   # Initialize plot

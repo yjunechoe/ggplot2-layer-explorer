@@ -1,22 +1,3 @@
-initial_code <- r"(p <- ggplot(penguins, aes(x = species)) +
-  geom_bar(
-    aes(
-      fill = species,
-      color = after_scale(alpha(fill, .5))
-    ),
-    linewidth = 3
-  ) +
-  geom_label(
-    aes(
-      y = after_stat(count),
-      label = after_stat(sprintf("%.1f%%", count/sum(count) * 100))
-    ),
-    size = 5,
-    position = position_nudge(y = 10),
-    stat = "count"
-  )
-)"
-
 # Simplified function definitions
 fns <- list(
   `Layer pipeline` = c(
