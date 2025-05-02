@@ -7,6 +7,7 @@ library(dplyr)
 library(rlang)
 library(palmerpenguins)
 library(bslib)
+library(bsicons)
 library(shinyAce)
 library(listviewer)
 library(DT)
@@ -21,9 +22,10 @@ ui <- page_sidebar(
     width = 300,
     radioButtons(
       "selected_function",
-      "Function selection:",
-      choices = unlist(fns, use.names=FALSE),
-      selected = character(0)
+      "Method selection:",
+      selected = character(0),
+      choiceNames = fns_info,
+      choiceValues = names(fns)
     ),
     if (!in_webr()) { actionButton("debug_btn", "Debug") }
   ),

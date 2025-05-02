@@ -1,19 +1,40 @@
 # Simplified function definitions
 fns <- list(
-  `Layer pipeline` = c(
-    "Layer$layer_data",
-    "Layer$setup_layer",
-    "Layer$compute_aesthetics",
-    "Layer$compute_statistic",
-    "Layer$map_statistic",
-    "Layer$compute_geom_1",
-    "Layer$compute_position",
-    "Layer$compute_geom_2",
-    "Layer$finish_statistics",
-    "Layer$draw_geom"
-  )
-  # `Built layer information` = c("layer_data", "layer_grob")
+  "Layer$layer_data" =
+    "Inherit plot data",
+  "Layer$setup_layer" =
+    "Append `PANEL` variable and infer `group`",
+  "Layer$compute_aesthetics" =
+    "Scale-transform all aesthetics",
+  "Layer$compute_statistic" =
+    "Compute Stat part of layer",
+  "Layer$map_statistic" =
+    "Resolve `after_stat()` and scale-transform computed variables",
+  "Layer$compute_geom_1" =
+    "Setup Geom part of layer",
+  "Layer$compute_position" =
+    "Apply position adjustments",
+  "Layer$compute_geom_2" =
+    "Fill in Geom defaults, apply hard-coded aesthetics, and resolve `after_scale()`",
+  "Layer$finish_statistics" =
+    "Apply final layer data manipulation hook",
+  "Layer$draw_geom" =
+    "Draw the Geom and return a graphical object (`grob`)"
 )
+
+fns_info <- lapply(seq_along(fns), \(i) {
+  span(
+    style = "display: inline-flex;",
+    span(names(fns)[i], style = "padding-right: 3px;"),
+    tooltip(
+      bsicons::bs_icon("question-circle"),
+      fns[[i]],
+      placement = "right"
+    )
+  )
+})
+
+
 
 fn_to_expr <- function(fn) {
   parsed <- parse_expr(fn)
