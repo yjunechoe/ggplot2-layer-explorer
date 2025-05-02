@@ -3,23 +3,23 @@ fns <- list(
   "Layer$layer_data" =
     "Inherit plot data",
   "Layer$setup_layer" =
-    "Append `PANEL` variable and infer `group`",
+    "Finalize data to be used for the layer",
   "Layer$compute_aesthetics" =
-    "Scale-transform all aesthetics",
+    "Setup Stat part of layer (scale-transform aesthetics and append `PANEL` and `group` variables)",
   "Layer$compute_statistic" =
     "Compute Stat part of layer",
   "Layer$map_statistic" =
-    "Resolve `after_stat()` and scale-transform computed variables",
+    "Scale-transform computed variables and resolve `after_stat()`",
   "Layer$compute_geom_1" =
     "Setup Geom part of layer",
   "Layer$compute_position" =
-    "Apply position adjustments",
+    "Apply Position adjustments",
   "Layer$compute_geom_2" =
     "Fill in Geom defaults, apply hard-coded aesthetics, and resolve `after_scale()`",
   "Layer$finish_statistics" =
-    "Apply final layer data manipulation hook",
+    "A hook to apply final layer data manipulation",
   "Layer$draw_geom" =
-    "Draw the Geom and return a graphical object (`grob`)"
+    "Draw the Geom, returning a graphical object (`grob`)"
 )
 
 fns_info <- lapply(seq_along(fns), \(i) {
