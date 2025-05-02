@@ -1,3 +1,5 @@
+source("packages.R")
+
 library(shiny)
 library(ggplot2)
 library(grid)
@@ -9,7 +11,6 @@ library(shinyAce)
 library(listviewer)
 library(DT)
 
-source("packages.R")
 source("utils.R")
 source("plot-examples.R")
 
