@@ -202,7 +202,12 @@ server <- function(input, output, session) {
         DTOutput("table_output")
       })
       output$table_output <- renderDT({
-        datatable(res)
+        res |>
+          datatable() |>
+          formatRound(
+            which(sapply(res, \(x) is.double(x) && !ggplot2:::is_mapped_discrete(x))),
+            digits = 2
+          )
       })
     } else {
       output$function_output_ui <- renderUI({
