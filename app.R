@@ -74,7 +74,7 @@ ui <- page_sidebar(
         radioInlinedButtons(
           inputId = "inspect_type",
           label = "Inspect:",
-          choices = c("output", "input"),
+          choices = c("input", "output"),
           extras = actionButton(
             "show_diff", "Show data diff", style = "margin: 1rem;",
             class = "btn-sm btn-primary mt-1"
