@@ -36,7 +36,7 @@ fns_info <- lapply(seq_along(fns), \(i) {
 
 
 
-fn_to_expr <- function(fn) {
+fn_to_expr <- function(fn, type = c("output", "input")) {
   parsed <- parse_expr(fn)
   # Built layer information
   if (is.symbol(parsed)) {
@@ -54,7 +54,7 @@ fn_to_expr <- function(fn) {
       fn <- paste0("ggplot2:::", fn)
     }
     expr <- call2(
-      "inspect_return",
+      paste0("inspect_", resolve_inspect_type(type)),
       x = sym("p"),
       method = parse_expr(fn),
       cond = call2("layer_is", sym("i"))
@@ -79,4 +79,37 @@ local_call <- function(expr) {
 poorman_styler <- function(expr) {
   gsub(x = expr, ",", ",\n ") |>
     gsub(x = _, "^(\\w+\\()(.+)(\\))$", "\\1\n  \\2\n\\3\n")
+}
+
+is.roundable <- function(x) {
+  is.double(x) &&
+    !ggplot2:::is_mapped_discrete(x) &&
+    !identical(x, floor(x))
+}
+
+radioInlinedButtons <- function(inputId, label, ..., extras = NULL) {
+  div(
+    div(
+      style = "display: flex; align-items: center;",
+      tags$label(
+        label,
+        style = "margin-right: 10px; margin-bottom: 1rem;"
+      ),
+      div(
+        radioButtons(
+          inputId = inputId,
+          label = NULL,
+          inline = TRUE,
+          width = "auto",
+          ...
+        )
+      ),
+      extras
+    ),
+  )
+}
+
+resolve_inspect_type <- function(x = c("output", "input")) {
+  x <- match.arg(x)
+  c("output" = "return", "input" = "args")[[x]]
 }

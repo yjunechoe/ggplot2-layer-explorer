@@ -23,7 +23,6 @@ ui <- page_sidebar(
     radioButtons(
       "selected_function",
       "Method selection:",
-      selected = character(0),
       choiceNames = fns_info,
       choiceValues = names(fns)
     ),
@@ -36,48 +35,56 @@ ui <- page_sidebar(
 
     # Code editor card
     card(
-      card_body(
-        max_height = "100px",
-        radioButtons(
-          "plot_selector",
-          "Use a pre-defined plot:",
-          choices = seq_along(plots),
-          selected = 1,
-          inline = TRUE,
-          width = "100%",
+      card_header("Define plot"),
+      div(
+        div(
+          style = "margin-top: 1rem;",
+          radioInlinedButtons(
+            inputId = "plot_selector",
+            label = "Use a pre-defined plot:",
+            choices = seq_along(plots)
+          )
+        ),
+        aceEditor(
+          "code_editor",
+          value = plots$plot1,
+          mode = "r", theme = "chrome", fontSize = 14,
+          minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
+        ),
+        div(
+          style = "display: flex; justify-content: space-between;",
+          actionButton("run_code_btn", "Run Plotting Code", class = "btn-primary"),
+          textOutput("code_error_output")
+        ),
+        div(
+          plotOutput("plot_preview", height = "300px")
         )
-      ),
-      card_header("Code Editor"),
-      aceEditor(
-        "code_editor",
-        value = plots$plot1,
-        mode = "r", theme = "chrome",
-        minLines = 1, maxLines = 20, autoScrollEditorIntoView = TRUE
-      ),
-      div(
-        style = "display: flex; justify-content: space-between;",
-        actionButton("run_code_btn", "Run Plotting Code", class = "btn-primary"),
-        textOutput("code_error_output")
-      ),
-      div(
-        plotOutput("plot_preview", height = "300px")
       )
     ),
 
     # Right panel with Layer Selector and Inspect
     card(
-      card_header("Inspect"),
+      card_header("Explore method"),
       div(
         div(
           style = "display: flex; align-items: center; margin-bottom: 10px;",
           span("Layer number (i):", style = "margin-right: 10px;"),
-          uiOutput("layer_input_ui", inline = TRUE)
+          uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;")
+        ),
+        radioInlinedButtons(
+          inputId = "inspect_type",
+          label = "Inspect:",
+          choices = c("output", "input"),
+          extras = actionButton(
+            "show_diff", "Show data diff", style = "margin: 1rem;",
+            class = "btn-sm btn-primary mt-1"
+          )
         ),
         aceEditor(
           "function_expr",
-          value = '"Click a function from the sidebar to explore ggplot layers"',
-          mode = "r", theme = "chrome",
-          minLines = 1, maxLines = 20, autoScrollEditorIntoView = TRUE
+          value = "",
+          mode = "r", theme = "chrome", fontSize = 14,
+          minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
         ),
         actionButton("run_inspect_expr_btn", "Run expression", class = "btn-sm btn-primary mt-1"),
         actionButton("run_highjack_expr_btn", "Highjack 😈", class = "btn-sm btn-secondary mt-1"),
@@ -93,7 +100,7 @@ server <- function(input, output, session) {
   lapply(
     c("ggtrace", "grid", "ggplot2", "dplyr"),
     function(pkg) eval(
-      rlang::call2("library", pkg, character.only = TRUE),
+      call2("library", pkg, character.only = TRUE),
       envir = user_env
     )
   )
@@ -103,6 +110,7 @@ server <- function(input, output, session) {
     eval(parse(text = plots$plot1), envir = user_env)
     # Set initial value for i
     user_env$i <- length(user_env$p$layers)
+    lockBinding("i", user_env)
   }, error = function(e) {
     # Silent error handling for initialization
   })
@@ -114,7 +122,7 @@ server <- function(input, output, session) {
   current_expr <- reactiveVal("")
 
   # Dynamic UI for layer input based on number of layers
-  output$layer_input_ui <- renderUI({
+  output$layer_id <- renderUI({
     nlayers <- layer_count()
     numericInput(
       "layer_selector",
@@ -165,9 +173,20 @@ server <- function(input, output, session) {
 
   # Update i when layer_selector changes
   observeEvent(input$layer_selector, {
+    unlockBinding("i", user_env)
     user_env$i <- input$layer_selector
+    lockBinding("i", user_env)
     # Re-run the inspect expression with updated layer selection
     run_inspect_expr(current_expr())
+  })
+
+  # Update expression when inspect_type changes
+  observeEvent(input$inspect_type, {
+    fn_call <- fn_to_expr(input$selected_function, input$inspect_type)
+    # Update the editor and run the expression
+    updateAceEditor(session, "function_expr", poorman_styler(fn_call))
+    current_expr(fn_call)  # Store current expression
+    run_inspect_expr(fn_call)
   })
 
   run_inspect_expr <- function(expr) {
@@ -203,11 +222,16 @@ server <- function(input, output, session) {
       })
       output$table_output <- renderDT({
         res |>
-          datatable() |>
-          formatRound(
-            which(sapply(res, \(x) is.double(x) && !ggplot2:::is_mapped_discrete(x))),
-            digits = 2
-          )
+          datatable(
+            extensions = "Scroller",
+            options = list(
+              dom = "t",
+              deferRender = TRUE,
+              scrollY = 400,
+              scroller = TRUE
+            )
+          ) |>
+          formatRound(which(sapply(res, is.roundable), 2))
       })
     } else {
       output$function_output_ui <- renderUI({
@@ -229,7 +253,7 @@ server <- function(input, output, session) {
     method_expr <- parse_expr(paste0("ggplot2:::", input$selected_function))
     layer_id_expr <- call2("layer_is", input$layer_selector)
     highjack_expr <- call2(
-      "highjack_return",
+      paste0("highjack_", resolve_inspect_type(input$inspect_type)),
       x = sym("p"),
       method = method_expr,
       cond = layer_id_expr,
@@ -237,7 +261,7 @@ server <- function(input, output, session) {
       .ns = "ggtrace"
     )
     highjack_res <- tryCatch(
-      rlang::eval_tidy(
+      eval_tidy(
         local_call(highjack_expr),
         list(inspect_res = inspect_res),
         user_env
@@ -248,7 +272,8 @@ server <- function(input, output, session) {
     eval(call2("suppressMessages", untrace_expr), user_env)
 
     if (is_error(highjack_res)) {
-      og_res <- eval(parse_expr(fn_to_expr(input$selected_function)), user_env)
+      fn_call <- fn_to_expr(input$selected_function, input$inspect_type)
+      og_res <- eval(parse_expr(fn_call), user_env)
       output$function_output_ui <- renderUI({
         verbatimTextOutput("text_output")
       })
@@ -293,11 +318,9 @@ server <- function(input, output, session) {
   # Handle radio button selection
   observeEvent(input$selected_function, {
     if (!is.null(input$selected_function)) {
-      fn <- input$selected_function
-      fn_call <- poorman_styler(fn_to_expr(fn))
-
+      fn_call <- fn_to_expr(input$selected_function, input$inspect_type)
       # Update the editor and run the expression
-      updateAceEditor(session, "function_expr", value = fn_call)
+      updateAceEditor(session, "function_expr", poorman_styler(fn_call))
       current_expr(fn_call)  # Store current expression
       run_inspect_expr(fn_call)
     }
