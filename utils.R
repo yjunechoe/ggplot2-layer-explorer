@@ -1,3 +1,7 @@
+Sys.setenv(
+  NO_COLOR = 1
+)
+
 # Simplified function definitions
 fns <- list(
   "Layer$layer_data" =
@@ -112,4 +116,17 @@ radioInlinedButtons <- function(inputId, label, ..., extras = NULL) {
 resolve_inspect_type <- function(x = c("output", "input")) {
   x <- match.arg(x)
   c("output" = "return", "input" = "args")[[x]]
+}
+
+compare_input_output <- function(input, output) {
+  input_data <- intersect(c("data", "plot_data"), names(input))
+  input <- input[[input_data]]
+  both_df <- is.data.frame(input) && is.data.frame(output)
+  waldo::compare(
+    input, output,
+    x_arg = paste0("input$", input_data), y_arg = "output",
+    max_diffs = if (both_df) Inf else 2,
+    ignore_attr = "row.names",
+    list_as_map = both_df
+  )
 }

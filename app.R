@@ -76,7 +76,8 @@ ui <- page_sidebar(
           label = "Inspect:",
           choices = c("input", "output"),
           extras = actionButton(
-            "show_diff", "Show data diff", style = "margin: 1rem;",
+            "show_input_output_diff", "Show data diff",
+            style = "margin: 1rem;",
             class = "btn-sm btn-primary mt-1"
           )
         ),
@@ -187,6 +188,36 @@ server <- function(input, output, session) {
     updateAceEditor(session, "function_expr", poorman_styler(fn_call))
     current_expr(fn_call)  # Store current expression
     run_inspect_expr(fn_call)
+  })
+
+  # Run data diff button
+  observeEvent(input$show_input_output_diff, {
+    input_call <- fn_to_expr(input$selected_function, "input")
+    output_call <- fn_to_expr(input$selected_function, "output")
+    input_data <- tryCatch(
+      eval(local_call(input_call), envir = user_env),
+      error = function(e) e
+    )
+    output_data <- tryCatch(
+      eval(local_call(output_call), envir = user_env),
+      error = function(e) e
+    )
+    comparison <- compare_input_output(input_data, output_data)
+    output$diff_result <- renderPrint({ comparison })
+    showModal(
+      modalDialog(
+        title = paste("Input-Output data diff for", input$selected_function),
+        easyClose = TRUE,
+        footer = NULL,
+        size = "xl",
+        accordion(
+          accordion_panel(
+            "Compare", verbatimTextOutput("diff_result"),
+          ),
+          open = length(comparison) == 0
+        )
+      )
+    )
   })
 
   run_inspect_expr <- function(expr) {
