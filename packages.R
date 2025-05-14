@@ -1,6 +1,7 @@
 in_webr <- function() {
   isTRUE(nzchar(Sys.getenv("WEBR")))
 }
+
 # Dependencies not picked up by shinylive
 if (in_webr()) {
   asNamespace("webr")$install(
@@ -14,3 +15,15 @@ if (in_webr()) {
   )
   asNamespace("webr")$install("munsell")
 }
+
+library(shiny)
+library(ggplot2)
+library(grid)
+library(dplyr)
+library(rlang)
+library(palmerpenguins)
+library(bslib)
+library(bsicons)
+library(shinyAce)
+library(listviewer)
+library(DT)

@@ -12,18 +12,26 @@ fns <- list(
     "Setup Stat part of layer (scale-transform aesthetics and append `PANEL` and `group` variables)",
   "Layer$compute_statistic" =
     "Compute Stat part of layer",
+  `└─ Stat$setup_data` = "Setup the data for computing statistics",
+  `└─ Stat$compute_layer` = "Apply stat computations",
   "Layer$map_statistic" =
     "Scale-transform computed variables and resolve `after_stat()`",
   "Layer$compute_geom_1" =
     "Setup Geom part of layer",
+  `└─ Geom$setup_data` = "Setup the data for computing geometries",
   "Layer$compute_position" =
     "Apply Position adjustments",
+  `└─ Position$setup_data` = "Setup the data for position adjustments",
+  `└─ Position$compute_layer` = "Apply position adjustments",
   "Layer$compute_geom_2" =
     "Fill in Geom defaults, apply hard-coded aesthetics, and resolve `after_scale()`",
+  `└─ Geom$use_defaults` = "Implements Layer$compute_geom_2",
   "Layer$finish_statistics" =
     "A hook to apply final layer data manipulation",
+  `└─ Stat$finish_layer` = "Implements Layer$finish_statistics",
   "Layer$draw_geom" =
-    "Draw the Geom, returning a graphical object (`grob`)"
+    "Draw the Geom, returning a graphical object (`grob`)",
+  `└─ Geom$draw_layer` = "Implements Layer$draw_layer"
 )
 
 fns_info <- lapply(seq_along(fns), \(i) {
@@ -38,25 +46,43 @@ fns_info <- lapply(seq_along(fns), \(i) {
   )
 })
 
+prune_fn <- function(x) {
+  gsub(x = x, "^.* ", "")
+}
 
+resolve_fn <- function(fn, user_env) {
+  fn <- prune_fn(fn)
+  if (grepl(x = fn, "^Layer")) {
+    return(paste0("ggplot2:::", fn))
+  }
+  splt <- strsplit(fn, "\\$")[[1]]
+  obj <- splt[1]
+  mthd <- splt[2]
+  ggproto_obj <- eval(expr(p$layers[[i]][[!!tolower(obj)]]), user_env)
+  which_ggproto <- names(which.max(sapply(
+    get_method_inheritance(ggproto_obj),
+    \(x) mthd %in% x
+  )))
+  paste(which_ggproto, mthd, sep = "$")
+}
 
-fn_to_expr <- function(fn, type = c("output", "input")) {
+fn_to_expr <- function(fn, type = c("output", "input"), user_env) {
+  user_env <- eval.parent(quote(user_env))
+  fn <- prune_fn(fn)
   parsed <- parse_expr(fn)
   # Built layer information
   if (is.symbol(parsed)) {
     if (grepl(x = fn, "^layer_")) {
-      # ggplot2
+      # ggplot2 (ex: layer_data())
       expr <- call2(fn, p = sym("p"), i = sym("i"))
     } else {
-      # ggtrace
+      # ggtrace (ex: layer_after_stat())
       fn <- paste0("layer_", fn)
       expr <- call2(fn, p = sym("p"), i = sym("i"), .ns = "ggtrace")
     }
   } else {
     # ggproto
-    if (!strsplit(fn, "\\$")[[1]][1] %in% getNamespaceExports("ggplot2")) {
-      fn <- paste0("ggplot2:::", fn)
-    }
+    fn <- resolve_fn(fn, user_env)
     expr <- call2(
       paste0("inspect_", resolve_inspect_type(type)),
       x = sym("p"),

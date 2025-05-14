@@ -1,95 +1,98 @@
 source("packages.R")
-
-library(shiny)
-library(ggplot2)
-library(grid)
-library(dplyr)
-library(rlang)
-library(palmerpenguins)
-library(bslib)
-library(bsicons)
-library(shinyAce)
-library(listviewer)
-library(DT)
-
 source("utils.R")
 source("plot-examples.R")
 
 # UI layout
-ui <- page_sidebar(
+ui <- page_navbar(
   title = "ggplot2 Layer Explorer",
-  sidebar = sidebar(
-    width = 300,
-    radioButtons(
-      "selected_function",
-      "Method selection:",
-      choiceNames = fns_info,
-      choiceValues = names(fns)
-    ),
-    if (!in_webr()) { actionButton("debug_btn", "Debug") }
-  ),
+  # Main Explorer tab
+  nav_panel(
+    title = "Explorer",
+    page_sidebar(
+      sidebar = sidebar(
+        width = 350,
+        radioButtons(
+          "selected_function",
+          "Method selection:",
+          choiceNames = fns_info,
+          choiceValues = names(fns)
+        ),
+        if (!in_webr()) { actionButton("debug_btn", "Debug") }
+      ),
 
-  layout_column_wrap(
-    width = 1/2,
-    height = "calc(100vh - 100px)",
+      layout_column_wrap(
+        width = 1/2,
+        height = "calc(100vh - 100px)",
 
-    # Code editor card
-    card(
-      card_header("Define plot"),
-      div(
-        div(
-          style = "margin-top: 1rem;",
-          radioInlinedButtons(
-            inputId = "plot_selector",
-            label = "Use a pre-defined plot:",
-            choices = seq_along(plots)
+        # Code editor card
+        card(
+          card_header("Define plot"),
+          div(
+            div(
+              style = "margin-top: 1rem;",
+              radioInlinedButtons(
+                inputId = "plot_selector",
+                label = "Use a pre-defined plot:",
+                choices = seq_along(plots)
+              )
+            ),
+            aceEditor(
+              "code_editor",
+              value = plots$plot1,
+              mode = "r", theme = "chrome", fontSize = 14,
+              minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
+            ),
+            div(
+              style = "display: flex; justify-content: space-between;",
+              actionButton("run_code_btn", "Run Plotting Code", class = "btn-primary"),
+              textOutput("code_error_output")
+            ),
+            div(
+              plotOutput("plot_preview", height = "300px")
+            )
           )
         ),
-        aceEditor(
-          "code_editor",
-          value = plots$plot1,
-          mode = "r", theme = "chrome", fontSize = 14,
-          minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
-        ),
-        div(
-          style = "display: flex; justify-content: space-between;",
-          actionButton("run_code_btn", "Run Plotting Code", class = "btn-primary"),
-          textOutput("code_error_output")
-        ),
-        div(
-          plotOutput("plot_preview", height = "300px")
+
+        # Right panel with Layer Selector and Inspect
+        card(
+          card_header("Explore method"),
+          div(
+            div(
+              style = "display: flex; align-items: center; margin-bottom: 10px;",
+              span("Layer number (i):", style = "margin-right: 10px;"),
+              uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;")
+            ),
+            radioInlinedButtons(
+              inputId = "inspect_type",
+              label = "Inspect:",
+              choices = c("input", "output"),
+              extras = actionButton(
+                "show_input_output_diff", "Show data diff",
+                style = "margin: 1rem;",
+                class = "btn-sm btn-primary mt-1"
+              )
+            ),
+            aceEditor(
+              "function_expr",
+              value = "",
+              mode = "r", theme = "chrome", fontSize = 14,
+              minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
+            ),
+            actionButton("run_inspect_expr_btn", "Run expression", class = "btn-sm btn-primary mt-1"),
+            actionButton("run_highjack_expr_btn", "Highjack 😈", class = "btn-sm btn-secondary mt-1"),
+            uiOutput("function_output_ui")
+          )
         )
       )
-    ),
+    )
+  ),
 
-    # Right panel with Layer Selector and Inspect
+  # About tab
+  nav_panel(
+    title = "About",
     card(
-      card_header("Explore method"),
-      div(
-        div(
-          style = "display: flex; align-items: center; margin-bottom: 10px;",
-          span("Layer number (i):", style = "margin-right: 10px;"),
-          uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;")
-        ),
-        radioInlinedButtons(
-          inputId = "inspect_type",
-          label = "Inspect:",
-          choices = c("input", "output"),
-          extras = actionButton(
-            "show_input_output_diff", "Show data diff",
-            style = "margin: 1rem;",
-            class = "btn-sm btn-primary mt-1"
-          )
-        ),
-        aceEditor(
-          "function_expr",
-          value = "",
-          mode = "r", theme = "chrome", fontSize = 14,
-          minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
-        ),
-        actionButton("run_inspect_expr_btn", "Run expression", class = "btn-sm btn-primary mt-1"),
-        actionButton("run_highjack_expr_btn", "Highjack 😈", class = "btn-sm btn-secondary mt-1"),
-        uiOutput("function_output_ui")
+      card_body(
+        includeMarkdown("about.md")
       )
     )
   )
@@ -110,14 +113,14 @@ server <- function(input, output, session) {
   tryCatch({
     eval(parse(text = plots$plot1), envir = user_env)
     # Set initial value for i
-    user_env$i <- length(user_env$p$layers)
+    user_env$i <- 1
     lockBinding("i", user_env)
   }, error = function(e) {
     # Silent error handling for initialization
   })
 
   # Reactive for number of layers
-  layer_count <- reactiveVal(user_env$i)
+  layer_count <- reactiveVal(length(user_env$p$layers))
 
   # Reactive for current expression
   current_expr <- reactiveVal("")
@@ -157,14 +160,29 @@ server <- function(input, output, session) {
     })
   }
 
+  # Refresh and execute inspect code
+  update_and_run_inspect_expr <- function(fn = input$selected_function,
+                                          inspect_type = input$inspect_type) {
+    fn_call <- fn_to_expr(fn, inspect_type)
+    updateAceEditor(session, "function_expr", poorman_styler(fn_call))
+    current_expr(fn_call)
+    run_inspect_expr(fn_call)
+  }
+
   observeEvent(input$run_code_btn, {
     run_code_editor(input$code_editor)
   })
 
   observeEvent(input$plot_selector, {
+    # Reset layer ID
+    updateNumericInput(session, "layer_selector", value = 1)
+    update_i(value = 1)
+    # Update and run plot expression
     selected_plot_code <- plots[[as.integer(input$plot_selector)]]
     updateAceEditor(session, "code_editor", value = selected_plot_code)
     run_code_editor(selected_plot_code)
+    # Update and run inspect expression
+    update_and_run_inspect_expr()
   })
 
   # Initialize plot
@@ -172,22 +190,23 @@ server <- function(input, output, session) {
     user_env$p
   })
 
+  update_i <- function(value) {
+    unlockBinding("i", user_env)
+    user_env$i <- value
+    lockBinding("i", user_env)
+  }
+
   # Update i when layer_selector changes
   observeEvent(input$layer_selector, {
-    unlockBinding("i", user_env)
-    user_env$i <- input$layer_selector
-    lockBinding("i", user_env)
-    # Re-run the inspect expression with updated layer selection
-    run_inspect_expr(current_expr())
+    update_i(input$layer_selector)
+    # Update and run inspect expression
+    update_and_run_inspect_expr()
   })
 
   # Update expression when inspect_type changes
   observeEvent(input$inspect_type, {
-    fn_call <- fn_to_expr(input$selected_function, input$inspect_type)
-    # Update the editor and run the expression
-    updateAceEditor(session, "function_expr", poorman_styler(fn_call))
-    current_expr(fn_call)  # Store current expression
-    run_inspect_expr(fn_call)
+    # Update and run inspect expression
+    update_and_run_inspect_expr()
   })
 
   # Run data diff button
@@ -206,16 +225,12 @@ server <- function(input, output, session) {
     output$diff_result <- renderPrint({ comparison })
     showModal(
       modalDialog(
-        title = paste("Input-Output data diff for", input$selected_function),
+        title = "Data diff",
         easyClose = TRUE,
         footer = NULL,
         size = "xl",
-        accordion(
-          accordion_panel(
-            "Compare", verbatimTextOutput("diff_result"),
-          ),
-          open = length(comparison) == 0
-        )
+        verbatimTextOutput("diff_result"),
+        open = TRUE
       )
     )
   })
@@ -260,7 +275,8 @@ server <- function(input, output, session) {
               deferRender = TRUE,
               scrollY = 400,
               scroller = TRUE
-            )
+            ),
+            fillContainer = TRUE
           ) |>
           formatRound(which(sapply(res, is.roundable), 2))
       })
@@ -281,7 +297,7 @@ server <- function(input, output, session) {
       error = function(e) e
     )
 
-    method_expr <- parse_expr(paste0("ggplot2:::", input$selected_function))
+    method_expr <- parse_expr(resolve_fn(input$selected_function, user_env))
     layer_id_expr <- call2("layer_is", input$layer_selector)
     highjack_expr <- call2(
       paste0("highjack_", resolve_inspect_type(input$inspect_type)),
@@ -326,7 +342,10 @@ server <- function(input, output, session) {
       })
     } else {
       output$function_output_ui <- renderUI({
-        plotOutput("grob_plot_output", height = "300px")
+        div(
+          style = "border: 5px solid #800080",
+          plotOutput("grob_plot_output", height = "300px")
+        )
       })
       output$grob_plot_output <- renderPlot({
         grid.newpage()
@@ -349,11 +368,8 @@ server <- function(input, output, session) {
   # Handle radio button selection
   observeEvent(input$selected_function, {
     if (!is.null(input$selected_function)) {
-      fn_call <- fn_to_expr(input$selected_function, input$inspect_type)
-      # Update the editor and run the expression
-      updateAceEditor(session, "function_expr", poorman_styler(fn_call))
-      current_expr(fn_call)  # Store current expression
-      run_inspect_expr(fn_call)
+      # Update and run inspect expression
+      update_and_run_inspect_expr()
     }
   })
 
