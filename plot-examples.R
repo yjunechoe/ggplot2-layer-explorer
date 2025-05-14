@@ -1,8 +1,8 @@
 plot1 <- r"(
 # Plot data as points and fit a linear model
-p <- ggplot(mtcars, aes(x = mpg, y = disp)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_smooth(formula = y ~ x, method = "lm") +
-  geom_point()
+  geom_point(position = position_jitter(seed = 1))
 )"
 
 plot2 <- r"(
