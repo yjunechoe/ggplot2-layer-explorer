@@ -14,7 +14,6 @@ if (in_webr()) {
     repos = c("https://react-r.r-universe.dev", "https://repo.r-wasm.org/")
   )
   asNamespace("webr")$install("munsell")
-  asNamespace("webr")$install("markdown")
 }
 
 library(shiny)

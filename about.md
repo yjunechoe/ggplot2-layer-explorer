@@ -23,11 +23,7 @@ A great number of ggproto objects and methods are involved in the rendering of a
 1. Called _exactly once_ per layer
 2. Manipulates the _layer data_ (dataframe in, dataframe out).
 
-This excludes some important details like `Layout` methods and the more granular panel and group methods of `Stat$compute_*` and `Geom$draw_*`.
-
-This limited scope is intentional - it keeps the UI and the underlying implementation as simple as possible.
-
-Motivated users wanting to do more are encouraged to try out `ggtrace` on their own. Feel free to [ask questions on Github](https://github.com/yjunechoe/ggtrace/issues) about usage.
+This excludes some important details like `Layout` methods and the more granular panel and group methods of `Stat$compute_*` and `Geom$draw_*`. The limited scope is intentional - it keeps the UI and the underlying implementation as simple as possible. Motivated users wanting to do more are encouraged to try out `ggtrace` on their own. Feel free to [ask questions on Github](https://github.com/yjunechoe/ggtrace/issues) about usage.
 
 
 ## Acknowledgments

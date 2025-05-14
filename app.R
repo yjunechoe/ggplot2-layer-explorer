@@ -92,7 +92,8 @@ ui <- page_navbar(
     title = "About",
     card(
       card_body(
-        includeMarkdown("about.md")
+        # markdown::mark("about.md", "about.html")
+        includeHTML("about.html")
       )
     )
   )
