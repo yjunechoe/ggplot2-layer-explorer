@@ -27,3 +27,8 @@ library(bsicons)
 library(shinyAce)
 library(listviewer)
 library(DT)
+
+# some hacks
+HAX <- quote({
+  assign("setup_data", function(data, params) { data }, envir = Geom)
+})
