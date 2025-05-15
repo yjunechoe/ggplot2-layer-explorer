@@ -18,12 +18,14 @@ Even for those who are not interested in writing extension packages, learning ab
 
 ## Scope
 
-A great number of ggproto objects and methods are involved in the rendering of a ggplot. The app exposes just a subset which meets the following requirements:
+Rendering a ggplot takes a whole [village of ggproto objects and methods](https://ggplot2.tidyverse.org/reference/ggplot2-ggproto.html). The app exposes just a small subset which meets the following requirements:
 
-1. Called _exactly once_ per layer
+1. Designed to be called _exactly once_ in building a layer
 2. Manipulates the _layer data_ (dataframe in, dataframe out).
 
-This excludes some important details like `Layout` methods and the more granular panel and group methods of `Stat$compute_*` and `Geom$draw_*`. The limited scope is intentional - it keeps the UI and the underlying implementation as simple as possible. Motivated users wanting to do more are encouraged to try out `ggtrace` on their own. Feel free to [ask questions on Github](https://github.com/yjunechoe/ggtrace/issues) about usage.
+This privileges layer-level ggprotos like `Stat`, `Geom`, and `Position`, and excludes the work of others like `Facet`, `Coord`, and `Guide`. The limited scope is intentional, for reasons both practical (keeps implementation simple) and opinionated (showcases just the most approachable ggprotos).
+
+Motivated users wanting to do more are encouraged to try out `ggtrace` on their own, outside of the app. I welcome any questions about usage [on Github](https://github.com/yjunechoe/ggtrace/issues).
 
 
 ## Acknowledgments
