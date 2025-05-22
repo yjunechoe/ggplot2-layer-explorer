@@ -349,6 +349,7 @@ server <- function(input, output, session) {
     } else {
       output$function_output_ui <- renderUI({
         div(
+          style = "font-size: 0.8rem",
           verbatimTextOutput("highjack_expr_putput"),
           plotOutput("highjack_plot_output", height = "300px")
         )

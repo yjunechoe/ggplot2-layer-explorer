@@ -1,19 +1,64 @@
-<h1 id="about">About</h1>
-<p>The <strong>ggplot2 Layer Explorer</strong> is an <a href="https://shiny.posit.co/">R Shiny app</a> that exposes the internal layer-building pipeline of <a href="https://github.com/tidyverse/ggplot2/">ggplot2</a>. It is primarily designed as a pedagogical tool, allowing users to <em>see</em> (<strong>inspect</strong>) and <em>touch</em> (<strong>highjack</strong>) a layer’s data as it flows through internal processes. The aim is to help build an intuition for how user-facing code manifests into a plot.</p>
-<p>The app makes visible a fundamental concept: <strong>each layer has a corresponding a tabular-data representation which undergoes incremental changes in the internal pipeline</strong>. This idea is formally motivated in the paper <a href="https://yjunechoe.github.io/static/papers/Choe_2022_SublayerGG.pdf">Sub-layer Modularity in the Grammar of Graphics</a> and the companion package <a href="https://github.com/yjunechoe/ggtrace">ggtrace</a> which powers the app. Later sections explain this idea in more detail in the context of the app.</p>
-<p>The ggplot2 Layer Explorer is designed by <a href="https://yjunechoe.github.io/">June Choe</a>. It is deployed from GitHub at <a href="https://github.com/yjunechoe/ggplot2-layer-explorer">yjunechoe/ggplot2-layer-explorer</a>, where you can also files any <a href="https://github.com/yjunechoe/ggplot2-layer-explorer/issues">issues</a>.</p>
-<h2 id="motivation">Motivation</h2>
-<p>While ggplot2 is traditionally understood as a visualization system, it can also be viewed as a sophisticated <strong>data wrangling pipeline</strong>. Each layer in a ggplot transforms its data through a series of data operations, from the raw input data to the drawing-ready data (and finally, into the graphical representation).</p>
-<p>This data-centric re-imagining of the internals is simplistic yet powerful. The internals-as-data-wrangling model is an effective intermediate-level abstraction because <strong>users of ggplot2 are already experts at reasoning about tabular data</strong> (e.g., <a href="https://github.com/tidyverse/dplyr/">dplyr</a>, <a href="https://github.com/Rdatatable/data.table">data.table</a>), something that we take for granted in the R community but is not necessarily true elsewhere. Moreover, many users aspire to develop their own <a href="https://exts.ggplot2.tidyverse.org/gallery/">extensions</a>; it turns out that conceptualizing extensions as custom data wrangling operations provides <a href="https://evamaerey.github.io/easy-geom-recipes/">the most accessible entry point</a> into becoming an <em>extension developer</em>.</p>
-<p>Even for those who are not interested in writing extension packages, learning about the internals can be <em>immediately useful</em> thanks to recent innovations in ggplot2’s <a href="https://ggplot2.tidyverse.org/reference/aes_eval.html">delayed aesthetic evaluation</a> system. The new-ish functions <code>after_stat()</code>, <code>after_scale()</code>, and <code>stage()</code> now give the user unprecedented control of the layer-building pipeline <em>from the outside</em>; this flexibility is unmatched by other implementations of the Grammar of Graphics. This, again, builds on familiar ideas rooted in non-standard evaluation (specifically, <a href="https://dplyr.tidyverse.org/articles/programming.html">tidy evaluation</a>), which R users are not strangers to (via <code>dplyr::mutate()</code>, the formula <code>~</code> interface, etc.). The app tries to demystify this family of functions: they essentially <strong>schedule <code>mutate()</code> calls on the layer data, to execute later</strong>.</p>
-<h2 id="scope">Scope</h2>
-<p>Rendering a ggplot takes a whole <a href="https://ggplot2.tidyverse.org/reference/ggplot2-ggproto.html">village of ggproto objects and methods</a>. The app exposes just a small subset which meets the following requirements:</p>
+<h2 id="about">About</h2>
+<p><strong>ggplot2 Layer Explorer</strong> is an <a href="https://shiny.posit.co/">R Shiny app</a> that exposes the internal layer-building pipeline of <a href="https://github.com/tidyverse/ggplot2/">ggplot2</a>. It allows you to <em>see</em> (<strong>inspect</strong>) and <em>touch</em> (<strong>highjack</strong>) a layer’s data as it flows through internal processes.</p>
+<h2 id="the-big-idea">The Big Idea</h2>
+<p>The app makes visible a fundamental idea in <code>{ggplot2}</code>: <strong>each layer has a corresponding tabular-data representation which undergoes incremental changes in the internals</strong>.</p>
+<p>This concept is further explored in:</p>
+<ul>
+<li><strong>Talks</strong>: <a href="https://youtu.be/613Q0j6Kjm0?feature=shared">JSM 2023</a>, <a href="https://www.youtube.com/watch?v=dUBnitXf5mk">rstudioconf 2022</a>, <a href="https://www.youtube.com/watch?v=2JX8zu4QxMg&amp;t=2959s">useR! 2022</a></li>
+<li><strong>Paper</strong>: <a href="https://yjunechoe.github.io/static/papers/Choe_2022_SublayerGG.pdf">Sub-layer Modularity in the Grammar of Graphics</a></li>
+<li><strong>Companion package</strong>: <a href="https://github.com/yjunechoe/ggtrace">ggtrace</a></li>
+</ul>
+<h2 id="how-to-use-the-app">How to Use the App</h2>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Purpose</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Left Sidebar</strong></td>
+<td>Method selection</td>
+<td>Lists ggproto methods to explore</td>
+</tr>
+<tr>
+<td><strong>Middle Panel</strong></td>
+<td>Plot definition</td>
+<td>Define your plot or choose a pre-defined example</td>
+</tr>
+<tr>
+<td><strong>Right Panel</strong></td>
+<td>Method exploration</td>
+<td>Inspect/highjack method inputs/outputs using <code>{ggtrace}</code> functions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow">Workflow</h3>
 <ol>
-<li>Designed to be called <em>exactly once</em> in building a layer</li>
-<li>Manipulates the <em>layer data</em> (dataframe in, dataframe out).</li>
+<li><strong>Select a method</strong> from the left sidebar</li>
+<li><strong>Define a plot</strong> in the middle panel</li>
+<li><strong>Explore the method</strong> in the right panel with a populated <code>inspect_*()</code> call. Use options at the top to change the target of exploration (Do you want the input or output of the method? For which layer in the plot?)</li>
+<li><strong>Run expression</strong> to see the captured value, or <strong>Highjack</strong> to re-render the plot with a modified value</li>
 </ol>
-<p>This privileges layer-level ggprotos like <code>Stat</code>, <code>Geom</code>, and <code>Position</code>, and excludes the work of others like <code>Facet</code>, <code>Coord</code>, and <code>Guide</code>. The limited scope is intentional, for reasons both practical (keeps implementation simple) and opinionated (showcases just the most approachable ggprotos).</p>
-<p>Motivated users wanting to do more are encouraged to try out <code>ggtrace</code> on their own, outside of the app. I welcome any questions about usage <a href="https://github.com/yjunechoe/ggtrace/issues">on Github</a>.</p>
+<h3 id="tips">Tips</h3>
+<ul>
+<li>
+<p><strong>Data Methods</strong>: Most methods are data-in → data-out. You can manipulate these data frames with <code>{dplyr}</code> functions like <code>mutate()</code></p>
+</li>
+<li>
+<p><strong>Drawing Methods</strong>: The final steps in the pipeline are data-in → grob-out. You can manipulate the grobs (graphics objects) with <code>{grid}</code> functions like <code>editGrob()</code></p>
+</li>
+</ul>
+<h2 id="technical-scope">Technical Scope</h2>
+<p>The app exposes just a small subset of <a href="https://ggplot2.tidyverse.org/reference/ggplot2-ggproto.html">ggproto methods</a> that are:</p>
+<ul>
+<li>✅ Called exactly once on layer data</li>
+<li>✅ Data-in, data/grob-out operations</li>
+<li>✅ Pure functions</li>
+</ul>
+<p>For more advanced usage beyond the app, try <code>{ggtrace}</code> directly. Questions welcome <a href="https://github.com/yjunechoe/ggtrace/issues">on GitHub</a>.</p>
 <h2 id="acknowledgments">Acknowledgments</h2>
-<p>This project would not be possible without the developers of <code>ggplot2</code>. I am indebted to the <a href="https://github.com/ggplot2-extenders/ggplot-extension-club">ggplot2 extenders community</a> for inspiration, feedback, and support.</p>
+<p>This project would not be possible without <code>{ggplot2}</code> and <code>{shiny}</code> + <code>{webr}</code>. I am hugely grateful to folks in the <a href="https://github.com/ggplot2-extenders/ggplot-extension-club">ggplot2 extenders community</a>, especially <a href="https://github.com/EvaMaeRey">Gina Reynolds</a> and <a href="https://github.com/teunbrand">Teun van den Brand</a>, for early feedback and support.</p>
 
