@@ -145,7 +145,7 @@ server <- function(input, output, session) {
   run_code_editor <- function(code_text) {
     output$code_error_output <- renderText("")
     tryCatch({
-      eval(parse(text = code_text), envir = user_env)
+      eval(parse(text = gsub(x = code_text, "\r", "")), envir = user_env)
       if (!exists("p", envir = user_env) || !inherits(user_env$p, "ggplot")) {
         stop("A ggplot object `p` must exist in the environment")
       }
@@ -306,13 +306,12 @@ server <- function(input, output, session) {
       x = sym("p"),
       method = method_expr,
       cond = layer_id_expr,
-      value = sym("inspect_res"),
-      .ns = "ggtrace"
+      value = sym("new_value")
     )
     highjack_res <- tryCatch(
       eval_tidy(
         local_call(highjack_expr),
-        list(inspect_res = inspect_res),
+        list(new_value = inspect_res),
         user_env
       ),
       error = function(e) e
@@ -345,11 +344,15 @@ server <- function(input, output, session) {
     } else {
       output$function_output_ui <- renderUI({
         div(
-          style = "border: 5px solid #800080",
-          plotOutput("grob_plot_output", height = "300px")
+          verbatimTextOutput("highjack_expr_putput"),
+          plotOutput("highjack_plot_output", height = "300px")
         )
       })
-      output$grob_plot_output <- renderPlot({
+      output$highjack_expr_putput <- renderText({
+        names(highjack_expr)[names(highjack_expr) != "value"] <- ""
+        deparse1(highjack_expr)
+      })
+      output$highjack_plot_output <- renderPlot({
         grid.newpage()
         pushViewport(viewport())
         grid.draw(highjack_res)
