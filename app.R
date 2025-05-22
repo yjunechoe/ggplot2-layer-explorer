@@ -60,7 +60,8 @@ ui <- page_navbar(
             div(
               style = "display: flex; align-items: center; margin-bottom: 10px;",
               span("Layer number (i):", style = "margin-right: 10px;"),
-              uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;")
+              uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;"),
+              code(textOutput("selected_layer_fn"), style = "margin-left: 1rem;")
             ),
             radioInlinedButtons(
               inputId = "inspect_type",
@@ -79,7 +80,7 @@ ui <- page_navbar(
               minLines = 5, maxLines = 20, autoScrollEditorIntoView = TRUE
             ),
             actionButton("run_inspect_expr_btn", "Run expression", class = "btn-sm btn-primary mt-1"),
-            actionButton("run_highjack_expr_btn", "Highjack 😈", class = "btn-sm btn-secondary mt-1"),
+            actionButton("run_highjack_expr_btn", "Highjack plot 😈", class = "btn-sm btn-secondary mt-1"),
             uiOutput("function_output_ui")
           )
         )
@@ -181,13 +182,13 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$plot_selector, {
-    # Reset layer ID
-    updateNumericInput(session, "layer_selector", value = 1)
-    update_i(value = 1)
     # Update and run plot expression
     selected_plot_code <- plots[[as.integer(input$plot_selector)]]
     updateAceEditor(session, "code_editor", value = selected_plot_code)
     run_code_editor(selected_plot_code)
+    # Reset layer ID
+    updateNumericInput(session, "layer_selector", value = 1)
+    update_i(1L)
     # Update and run inspect expression
     update_and_run_inspect_expr()
   })
@@ -198,9 +199,13 @@ server <- function(input, output, session) {
   })
 
   update_i <- function(value) {
+    # Update value in env
     unlockBinding("i", user_env)
     user_env$i <- value
     lockBinding("i", user_env)
+    # Update display
+    layer_fn <- evalq(deparse1(p$layers[[i]]$constructor[1]), user_env)
+    output$selected_layer_fn <- renderText({ layer_fn })
   }
 
   # Update i when layer_selector changes

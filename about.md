@@ -25,7 +25,7 @@ This concept is further explored in:
 1. **Select a method** from the left sidebar
 2. **Define a plot** in the middle panel
 3. **Explore the method** in the right panel with a populated `inspect_*()` call. Use options at the top to change the target of exploration (Do you want the input or output of the method? For which layer in the plot?)
-4. **Run expression** to see the captured value, or **Highjack** to re-render the plot with a modified value
+4. **Run expression** to see the captured value, or **Highjack plot** to re-render the ggplot with a modified input/output value for the selected method
 
 ### Tips
 
