@@ -16,6 +16,11 @@ if (in_webr()) {
   asNamespace("webr")$install("munsell")
 }
 
+# Pre-processing
+if (!in_webr()) {
+  asNamespace("markdown")$mark("about.md", "about.html")
+}
+
 library(shiny)
 library(ggplot2)
 library(grid)

@@ -90,10 +90,15 @@ ui <- page_navbar(
   # About tab
   nav_panel(
     title = "About",
-    card(
-      card_body(
-        # markdown::mark("about.md", "about.html")
-        includeHTML("about.html")
+    page_fillable(
+      padding = 20,
+      div(
+        style = "max-width: 900px; margin: 0 auto;",
+        card(
+          card_body(
+            includeHTML("about.html")
+          )
+        )
       )
     )
   )
