@@ -144,6 +144,25 @@ resolve_inspect_type <- function(x = c("output", "input")) {
   c("output" = "return", "input" = "args")[[x]]
 }
 
+show_sublayer_methods <- function(x) {
+  methods_data <- list(
+    Stat = get_method_inheritance(x$stat),
+    Geom = get_method_inheritance(x$geom),
+    Position = get_method_inheritance(x$position)
+  )
+  methods_table <- do.call(rbind, lapply(names(methods_data), function(main_class) {
+    do.call(rbind, lapply(names(methods_data[[main_class]]), function(sub_class) {
+      data.frame(
+        Class = main_class,
+        Subclasses = sub_class,
+        Methods = paste(methods_data[[main_class]][[sub_class]], collapse = ", ")
+      )
+    }))
+  }))
+  methods_table$Class[duplicated(methods_table$Class)] <- ""
+  methods_table
+}
+
 compare_input_output <- function(input, output) {
   input_data <- intersect(c("data", "plot_data"), names(input))
   input <- input[[input_data]]

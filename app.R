@@ -5,6 +5,7 @@ source("plot-examples.R")
 # UI layout
 ui <- page_navbar(
   title = "ggplot2 Layer Explorer",
+  theme = bs_theme(),
   # Main Explorer tab
   nav_panel(
     title = "Explorer",
@@ -29,13 +30,14 @@ ui <- page_navbar(
           card_header("Define plot"),
           div(
             div(
-              style = "margin-top: 1rem;",
+              style = "margin-bottom: -1rem;",
               radioInlinedButtons(
                 inputId = "plot_selector",
                 label = "Use a pre-defined plot:",
                 choices = seq_along(plots)
               )
             ),
+            hr(style = "margin: 1rem 0;"),
             aceEditor(
               "code_editor",
               value = plots$plot1,
@@ -58,21 +60,30 @@ ui <- page_navbar(
           card_header("Explore method"),
           div(
             div(
-              style = "display: flex; align-items: center; margin-bottom: 10px;",
+              style = "display: flex; align-items: center; margin-bottom: -1rem;",
               span("Layer number (i):", style = "margin-right: 10px;"),
               uiOutput("layer_id", inline = TRUE, style = "margin-bottom: -1rem;"),
-              code(textOutput("selected_layer_fn"), style = "margin-left: 1rem;")
-            ),
-            radioInlinedButtons(
-              inputId = "inspect_type",
-              label = "Inspect:",
-              choices = c("input", "output"),
-              extras = actionButton(
-                "show_input_output_diff", "Show data diff",
-                style = "margin: 1rem;",
+              code(textOutput("selected_layer_fn"), style = "margin-left: 1rem;"),
+              actionButton(
+                "show_layer_methods", "Show layer info",
+                style = "margin-left: 1rem;",
                 class = "btn-sm btn-primary mt-1"
               )
             ),
+            div(
+              style = "margin-top: 1.5rem; margin-bottom: -1rem;",
+              radioInlinedButtons(
+                inputId = "inspect_type",
+                label = "Inspect:",
+                choices = c("input", "output"),
+                extras = actionButton(
+                  "show_input_output_diff", "Show data diff",
+                  style = "margin: 1rem;",
+                  class = "btn-sm btn-primary mt-1"
+                )
+              )
+            ),
+            hr(style = "margin: 1rem 0;"),
             aceEditor(
               "function_expr",
               value = "",
@@ -127,10 +138,9 @@ server <- function(input, output, session) {
     # Silent error handling for initialization
   })
 
-  # Reactive for number of layers
+  # Initialize reactive for number of layers
   layer_count <- reactiveVal(length(user_env$p$layers))
-
-  # Reactive for current expression
+  # Initialize reactive for current expression
   current_expr <- reactiveVal("")
 
   # Dynamic UI for layer input based on number of layers
@@ -198,13 +208,16 @@ server <- function(input, output, session) {
     user_env$p
   })
 
+  cur_layer <- function() {
+    evalq(p$layers[[i]], user_env)
+  }
   update_i <- function(value) {
     # Update value in env
     unlockBinding("i", user_env)
     user_env$i <- value
     lockBinding("i", user_env)
     # Update display
-    layer_fn <- evalq(deparse1(p$layers[[i]]$constructor[1]), user_env)
+    layer_fn <- deparse1(cur_layer()$constructor[1])
     output$selected_layer_fn <- renderText({ layer_fn })
   }
 
@@ -238,11 +251,40 @@ server <- function(input, output, session) {
     showModal(
       modalDialog(
         title = "Data diff",
+        verbatimTextOutput("diff_result"),
         easyClose = TRUE,
         footer = NULL,
         size = "xl",
-        verbatimTextOutput("diff_result"),
         open = TRUE
+      )
+    )
+  })
+
+  # Layer methods info button
+  observeEvent(input$show_layer_methods, {
+    thelayer <- cur_layer()
+    output$layer_constructor_text <- renderText({
+      deparse1(thelayer$constructor)
+    })
+    layer_methods <- show_sublayer_methods(thelayer)
+    showModal(
+      modalDialog(
+        title = "Method Inheritance",
+        div(
+          verbatimTextOutput("layer_constructor_text"),
+          renderTable(
+            layer_methods,
+            striped = TRUE,
+            hover = TRUE,
+            bordered = TRUE,
+            spacing = 'xs',
+            width = '100%'
+          )
+        ),
+        easyClose = TRUE,
+        footer = NULL,
+        size = "xl",
+        optn = TRUE
       )
     )
   })
@@ -395,7 +437,9 @@ server <- function(input, output, session) {
     cat(input$function_expr)
   })
 
-  if (!in_webr()) { observeEvent(input$debug_btn, { browser() }) }
+  if (!in_webr()) {
+    observeEvent(input$debug_btn, { browser() })
+  }
 
 }
 
