@@ -16,7 +16,7 @@ if (in_webr()) {
   asNamespace("webr")$install("munsell")
 }
 
-# Pre-processing
+# Local pre-processing
 if (!in_webr()) {
   asNamespace("markdown")$mark("about.md", "about.html")
 }
@@ -32,8 +32,3 @@ library(bsicons)
 library(shinyAce)
 library(listviewer)
 library(DT)
-
-# some hacks
-HAX <- quote({
-  assign("setup_data", function(data, params) { data }, envir = Geom)
-})

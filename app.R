@@ -269,7 +269,7 @@ server <- function(input, output, session) {
     layer_methods <- show_sublayer_methods(thelayer)
     showModal(
       modalDialog(
-        title = "Method Inheritance",
+        title = "Layer information",
         div(
           verbatimTextOutput("layer_constructor_text"),
           renderTable(
@@ -284,7 +284,7 @@ server <- function(input, output, session) {
         easyClose = TRUE,
         footer = NULL,
         size = "xl",
-        optn = TRUE
+        open = TRUE
       )
     )
   })
