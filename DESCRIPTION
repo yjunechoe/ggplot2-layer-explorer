@@ -16,7 +16,6 @@ Imports:
     dplyr,
     DT,
     ggplot2 (>= 3.5.2),
-    ggtrace (>= 0.7.7),
     grid,
     listviewer,
     rlang,
