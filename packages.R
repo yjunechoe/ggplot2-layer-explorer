@@ -22,7 +22,6 @@ if (!in_webr()) {
 
 library(shiny)
 library(ggplot2)
-library(ggtrace)
 library(grid)
 library(dplyr)
 library(rlang)
