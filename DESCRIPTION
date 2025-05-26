@@ -22,6 +22,4 @@ Imports:
     rlang,
     shiny,
     shinyAce
-Remotes: 
-    github::yjunechoe/ggtrace@*release
 Encoding: UTF-8
