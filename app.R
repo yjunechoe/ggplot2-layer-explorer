@@ -126,7 +126,6 @@ server <- function(input, output, session) {
       envir = user_env
     )
   )
-  eval(HAX, user_env)
 
   # Run initial code
   tryCatch({

@@ -8,7 +8,6 @@ if (in_webr()) {
     "ggtrace",
     repos = c("https://yjunechoe.r-universe.dev", "https://repo.r-wasm.org/")
   )
-  stopifnot(packageVersion("ggtrace") >= package_version("0.7.4"))
   asNamespace("webr")$install(
     "reactR",
     repos = c("https://react-r.r-universe.dev", "https://repo.r-wasm.org/")
@@ -23,6 +22,7 @@ if (!in_webr()) {
 
 library(shiny)
 library(ggplot2)
+library(ggtrace)
 library(grid)
 library(dplyr)
 library(rlang)
@@ -32,3 +32,5 @@ library(bsicons)
 library(shinyAce)
 library(listviewer)
 library(DT)
+
+stopifnot(packageVersion("ggtrace") >= package_version("0.7.7"))
