@@ -21,12 +21,12 @@
 <tr>
 <td><strong>Left Sidebar</strong></td>
 <td>Method selection</td>
-<td>Lists ggproto methods to explore</td>
+<td>Lists ggproto methods to select and explore</td>
 </tr>
 <tr>
 <td><strong>Middle Panel</strong></td>
 <td>Plot definition</td>
-<td>Define your plot or choose a pre-defined example</td>
+<td>Define your plot or choose from pre-defined examples</td>
 </tr>
 <tr>
 <td><strong>Right Panel</strong></td>
@@ -35,22 +35,49 @@
 </tr>
 </tbody>
 </table>
-<h3 id="workflow">Workflow</h3>
+<h3 id="general-workflow">General Workflow</h3>
 <ol>
 <li><strong>Select a method</strong> from the left sidebar</li>
 <li><strong>Define a plot</strong> in the middle panel</li>
-<li><strong>Explore the method</strong> in the right panel with a populated <code>inspect_*()</code> call. Use options at the top to change the target of exploration (Do you want the input or output of the method? For which layer in the plot?)</li>
-<li><strong>Run expression</strong> to see the captured value, or <strong>Highjack plot</strong> to re-render the ggplot with a modified input/output value for the selected method</li>
+<li><strong>Explore the method</strong> in the right panel with a populated <code>inspect_*()</code> call. Use options at the top to change the target of exploration (Do you want the <em>input</em> or <em>output</em> of the method? For <em>which layer</em> of the plot?)</li>
+<li><strong>Run expression</strong> to evaluate code in the right panel editor, or <strong>Highjack plot</strong> to re-render the plot with a modified value for the selected method</li>
 </ol>
-<h3 id="tips">Tips</h3>
-<ul>
-<li>
-<p><strong>Data Methods</strong>: Most methods are data-in → data-out. You can manipulate these data frames with <code>{dplyr}</code> functions like <code>mutate()</code></p>
+<h3 id="common-workflows">Common Workflows</h3>
+<p><strong>Exploring a Stat’s data-wrangling:</strong></p>
+<ol>
+<li>Select the <code>Stat$compute_layer</code> method</li>
+<li>Compare the input vs output (the "data diff")</li>
+<li>Use <code>mutate()</code> on output data and click <strong>"Run expression"</strong> to see changes
+<pre><code class="language-r">inspect_return(
+ ...
+) |>
+ mutate(x = x + rnorm(n())) # jitter
+</code></pre>
 </li>
-<li>
-<p><strong>Drawing Methods</strong>: The final steps in the pipeline are data-in → grob-out. You can manipulate the grobs (graphics objects) with <code>{grid}</code> functions like <code>editGrob()</code></p>
+<li>Click <strong>"Highjack plot"</strong> to see downstream consequences. If highjacking the input, ensure that you return a <code>list()</code> of arguments:
+<pre><code class="language-r">inspect_args(
+ ...
+) -> out # list of arguments to the method
+out$data <- out$data |> 
+ mutate(x = x + rnorm(n())) # jitter
+out
+</code></pre>
 </li>
-</ul>
+</ol>
+<p><strong>Exploring a Geom’s graphical object output:</strong></p>
+<ol>
+<li>Select the <code>Geom$draw_layer</code> method</li>
+<li>Inspect output (a <code>list()</code> of grobs). Pluck out a grob to draw it and see its structure.</li>
+<li>Use <code>editGrob()</code> on a grob and click <strong>"Run expression"</strong> to see changes</li>
+<li>Click <strong>"Highjack plot"</strong> to see how it would appear on the plot. Ensure that you return a <code>list()</code> of grobs (ex: <code>out</code> instead of <code>out[[1]]</code>).
+<pre><code class="language-r">inspect_return(
+ ...
+) -> out # list of grobs
+out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate
+out[[1]]
+</code></pre>
+</li>
+</ol>
 <h2 id="technical-scope">Technical Scope</h2>
 <p>The app exposes just a small subset of <a href="https://ggplot2.tidyverse.org/reference/ggplot2-ggproto.html">ggproto methods</a> that are:</p>
 <ul>

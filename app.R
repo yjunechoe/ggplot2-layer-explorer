@@ -108,6 +108,14 @@ ui <- page_navbar(
         style = "max-width: 900px; margin: 0 auto;",
         card(
           card_body(
+            tags$style(HTML("
+              pre code {
+                padding: 0px;
+              }
+              li {
+                margin-bottom: .2rem;
+              }
+            ")),
             includeHTML("about.html")
           )
         )

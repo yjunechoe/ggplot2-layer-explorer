@@ -16,22 +16,59 @@ This concept is further explored in:
 
 | Panel | Purpose | Details |
 |-------|---------|---------|
-| **Left Sidebar** | Method selection | Lists ggproto methods to explore |
-| **Middle Panel** | Plot definition | Define your plot or choose a pre-defined example |
+| **Left Sidebar** | Method selection | Lists ggproto methods to select and explore |
+| **Middle Panel** | Plot definition | Define your plot or choose from pre-defined examples |
 | **Right Panel** | Method exploration | Inspect/highjack method inputs/outputs using `{ggtrace}` functions |
 
-### Workflow
+### General Workflow
 
 1. **Select a method** from the left sidebar
 2. **Define a plot** in the middle panel
-3. **Explore the method** in the right panel with a populated `inspect_*()` call. Use options at the top to change the target of exploration (Do you want the input or output of the method? For which layer in the plot?)
-4. **Run expression** to see the captured value, or **Highjack plot** to re-render the ggplot with a modified input/output value for the selected method
+3. **Explore the method** in the right panel with a populated `inspect_*()` call. Use options at the top to change the target of exploration (Do you want the _input_ or _output_ of the method? For _which layer_ of the plot?)
+4. **Run expression** to evaluate code in the right panel editor, or **Highjack plot** to re-render the plot with a modified value for the selected method
 
-### Tips
+### Common Workflows
 
-- **Data Methods**: Most methods are data-in → data-out. You can manipulate these data frames with `{dplyr}` functions like `mutate()`
+**Exploring a Stat's data-wrangling:**
 
-- **Drawing Methods**: The final steps in the pipeline are data-in → grob-out. You can manipulate the grobs (graphics objects) with `{grid}` functions like `editGrob()`
+<ol>
+<li>Select the <code>Stat$compute_layer</code> method</li>
+<li>Compare the input vs output (the "data diff")</li>
+<li>Use <code>mutate()</code> on output data and click <strong>"Run expression"</strong> to see changes
+<pre><code class="language-r">inspect_return(
+ ...
+) |>
+ mutate(x = x + rnorm(n())) # jitter
+</code></pre>
+</li>
+<li>Click <strong>"Highjack plot"</strong> to see downstream consequences. If highjacking the input, ensure that you return a <code>list()</code> of arguments:
+<pre><code class="language-r">inspect_args(
+ ...
+) -> out # list of arguments to the method
+out$data <- out$data |> 
+ mutate(x = x + rnorm(n())) # jitter
+out
+</code></pre>
+</li>
+</ol>
+
+
+**Exploring a Geom's graphical object output:**
+
+<ol>
+<li>Select the <code>Geom$draw_layer</code> method</li>
+<li>Inspect output (a <code>list()</code> of grobs). Pluck out a grob to draw it and see its structure.</li>
+<li>Use <code>editGrob()</code> on a grob and click <strong>"Run expression"</strong> to see changes</li>
+<li>Click <strong>"Highjack plot"</strong> to see how it would appear on the plot. Ensure that you return a <code>list()</code> of grobs (ex: <code>out</code> instead of <code>out[[1]]</code>).
+<pre><code class="language-r">inspect_return(
+ ...
+) -> out # list of grobs
+out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate
+out[[1]]
+</code></pre>
+</li>
+</ol>
+
 
 ## Technical Scope
 
