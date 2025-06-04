@@ -4,7 +4,7 @@ An interactive R Shiny app that exposes `{ggplot2}`'s internal layer-building pi
 
 🚀 Live app: <https://yjunechoe.github.io/ggplot2-layer-explorer/>
 
-[](app_demo.mp4)
+![App Demo](app_demo.gif)
 
 ## Usage
 
