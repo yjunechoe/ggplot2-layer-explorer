@@ -1,15 +1,16 @@
 # ggplot2 layer explorer
 
-An interactive R Shiny app that exposes `{ggplot2}`'s internal layer-building pipeline, allowing you to inspect and modify a layer's data as it flows through each processing stage.
+An interactive R Shiny app that exposes `{ggplot2}`'s internal layer-building pipeline, allowing you to _see_ and _touch_ a layer's data as it flows through each processing stage.
 
 🚀 Live app: <https://yjunechoe.github.io/ggplot2-layer-explorer/>
 
-## What it does
+[](app_demo.mp4)
 
-- **Inspect** the internal data transformations pipeline in ggplot2 layers
-- **Highjack** data at any stage to see how modifications affect the final plot
-- **Explore** ggproto methods like `Stat$compute_layer` and `Geom$draw_layer`
-- **Learn** how the grammar of graphics is implemented under the hood
+## Usage
+
+Learn how the grammar of graphics is implemented under the hood with two workflows:
+- **Inspect** the internal data transformation pipeline of plot layers
+- **Highjack** the layer data see how modifications affect the final plot
 
 Designed for both `{ggplot2}` users and extension developers.
 

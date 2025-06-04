@@ -9,29 +9,29 @@ fns <- list(
   "Layer$setup_layer" =
     "Finalize data to be used for the layer",
   "Layer$compute_aesthetics" =
-    "Setup Stat part of layer (scale-transform aesthetics and append `PANEL` and `group` variables)",
+    "Set up aesthetics for the layer and attach `PANEL` and `group` columns",
   "Layer$compute_statistic" =
     "Compute Stat part of layer",
-  `└─ Stat$setup_data` = "Setup the data for computing statistics",
-  `└─ Stat$compute_layer` = "Apply stat computations",
+  `└─ Stat$setup_data` = "Set up the data for computing statistics",
+  `└─ Stat$compute_layer` = "Apply stat transformation and add computed variables",
   "Layer$map_statistic" =
     "Scale-transform computed variables and resolve `after_stat()`",
   "Layer$compute_geom_1" =
-    "Setup Geom part of layer",
-  `└─ Geom$setup_data` = "Setup the data for computing geometries",
+    "Set up Geom part of layer",
+  `└─ Geom$setup_data` = "Set up the data for computing geometries",
   "Layer$compute_position" =
     "Apply Position adjustments",
-  `└─ Position$setup_data` = "Setup the data for position adjustments",
+  `└─ Position$setup_data` = "Set up the data for position adjustments",
   `└─ Position$compute_layer` = "Apply position adjustments",
   "Layer$compute_geom_2" =
-    "Fill in Geom defaults, apply hard-coded aesthetics, and resolve `after_scale()`",
-  `└─ Geom$use_defaults` = "Implements Layer$compute_geom_2",
+    "Implements Layer$compute_geom_2",
+  `└─ Geom$use_defaults` = "Finalize aesthetics for the geom (ex: resolve `after_scale()`)",
   "Layer$finish_statistics" =
-    "A hook to apply final layer data manipulation",
-  `└─ Stat$finish_layer` = "Implements Layer$finish_statistics",
+    "Calls Stat$finish_layer",
+  `└─ Stat$finish_layer` = "A hook to apply final layer data manipulation",
   "Layer$draw_geom" =
-    "Draw the Geom, returning a graphical object (`grob`)",
-  `└─ Geom$draw_layer` = "Implements Layer$draw_layer"
+    "Calls Geom$draw_layer",
+  `└─ Geom$draw_layer` = "Draw the Geom, returning a graphical object (`grob`)"
 )
 
 fns_info <- lapply(seq_along(fns), \(i) {
