@@ -10,7 +10,7 @@ An interactive R Shiny app that exposes `{ggplot2}`'s internal layer-building pi
 
 Learn how the grammar of graphics is implemented under the hood with two workflows:
 - **Inspect** the internal data transformation pipeline of plot layers
-- **Highjack** the layer data see how modifications affect the final plot
+- **Highjack** the layer data to see how modifications affect the final plot
 
 Designed for both `{ggplot2}` users and extension developers.
 
@@ -43,6 +43,6 @@ shiny::runApp()
 
 **Package**: [ggtrace](https://yjunechoe.github.io/ggtrace/)
 
-**Paper**: [Sub-layer Modularity in the Grammar of Graphics](https://www.youtube.com/watch?v=dUBnitXf5mk&list=PL9HYL-VRX0oTOwqzVtL_q5T8MNrzn0mdH&index=38)
+**Paper**: [Sub-layer Modularity in the Grammar of Graphics](https://yjunechoe.github.io/static/papers/Choe_2022_SublayerGG.pdf)
 
 **Talks**: [JSM 2023](https://youtu.be/613Q0j6Kjm0?feature=shared), [rstudioconf 2022](https://www.youtube.com/watch?v=dUBnitXf5mk&list=PL9HYL-VRX0oTOwqzVtL_q5T8MNrzn0mdH&index=38), [useR! 2022](https://www.youtube.com/watch?v=2JX8zu4QxMg&t=2959s)
