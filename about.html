@@ -1,5 +1,5 @@
 <h2 id="about">About</h2>
-<p><strong>ggplot2 Layer Explorer</strong> is an <a href="https://shiny.posit.co/">R Shiny app</a> that exposes the internal layer-building pipeline of <a href="https://github.com/tidyverse/ggplot2/">ggplot2</a>. It allows you to <em>see</em> (<strong>inspect</strong>) and <em>touch</em> (<strong>highjack</strong>) a layer’s data as it flows through internal processes.</p>
+<p><strong>ggplot2 layer explorer</strong> is an <a href="https://shiny.posit.co/">R Shiny app</a> that exposes the internal layer-building pipeline of <a href="https://github.com/tidyverse/ggplot2/">ggplot2</a>. It allows you to <em>see</em> (<strong>inspect</strong>) and <em>touch</em> (<strong>highjack</strong>) a layer’s data as it flows through internal processes.</p>
 <h2 id="the-big-idea">The Big Idea</h2>
 <p>The app makes visible a fundamental idea in <code>{ggplot2}</code>: <strong>each layer has a corresponding tabular-data representation which undergoes incremental changes in the internals</strong>.</p>
 <p>This concept is further explored in:</p>
@@ -37,8 +37,8 @@
 </table>
 <h3 id="general-workflow">General Workflow</h3>
 <ol>
-<li><strong>Select a method</strong> from the left sidebar</li>
 <li><strong>Define a plot</strong> in the middle panel</li>
+<li><strong>Select a method</strong> from the left sidebar</li>
 <li><strong>Explore the method</strong> in the right panel with a populated <code>inspect_*()</code> call. Use options at the top to change the target of exploration (Do you want the <em>input</em> or <em>output</em> of the method? For <em>which layer</em> of the plot?)</li>
 <li><strong>Run expression</strong> to evaluate code in the right panel editor, or <strong>Highjack plot</strong> to re-render the plot with a modified value for the selected method</li>
 </ol>
@@ -73,8 +73,8 @@ out
 <pre><code class="language-r">inspect_return(
  ...
 ) -> out # list of grobs
-out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate
-out[[1]]
+out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate first grob
+out
 </code></pre>
 </li>
 </ol>

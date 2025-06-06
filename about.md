@@ -1,6 +1,6 @@
 ## About
 
-**ggplot2 Layer Explorer** is an [R Shiny app](https://shiny.posit.co/) that exposes the internal layer-building pipeline of [ggplot2](https://github.com/tidyverse/ggplot2/). It allows you to *see* (**inspect**) and *touch* (**highjack**) a layer's data as it flows through internal processes.
+**ggplot2 layer explorer** is an [R Shiny app](https://shiny.posit.co/) that exposes the internal layer-building pipeline of [ggplot2](https://github.com/tidyverse/ggplot2/). It allows you to *see* (**inspect**) and *touch* (**highjack**) a layer's data as it flows through internal processes.
 
 ## The Big Idea
 
@@ -22,8 +22,8 @@ This concept is further explored in:
 
 ### General Workflow
 
-1. **Select a method** from the left sidebar
-2. **Define a plot** in the middle panel
+1. **Define a plot** in the middle panel
+2. **Select a method** from the left sidebar
 3. **Explore the method** in the right panel with a populated `inspect_*()` call. Use options at the top to change the target of exploration (Do you want the _input_ or _output_ of the method? For _which layer_ of the plot?)
 4. **Run expression** to evaluate code in the right panel editor, or **Highjack plot** to re-render the plot with a modified value for the selected method
 
@@ -63,8 +63,8 @@ out
 <pre><code class="language-r">inspect_return(
  ...
 ) -> out # list of grobs
-out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate
-out[[1]]
+out[[1]] <- editGrob(out, vp = viewport(angle = 30)) # rotate first grob
+out
 </code></pre>
 </li>
 </ol>
