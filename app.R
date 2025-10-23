@@ -76,6 +76,7 @@ ui <- page_navbar(
                 inputId = "inspect_type",
                 label = "Inspect:",
                 choices = c("input", "output"),
+                selected = "output",
                 extras = actionButton(
                   "show_input_output_diff", "Show data diff",
                   style = "margin: 1rem;",
