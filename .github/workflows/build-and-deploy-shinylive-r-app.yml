@@ -21,6 +21,10 @@
 name: Deploy app
 
 on:
+  push:
+    branches: [main, master]
+  release:
+    types: [published]
   workflow_call:
     inputs:
       cache-version:
